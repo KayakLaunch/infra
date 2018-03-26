@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Peristent data stores for KayakLaunch.
+
+Resources:
+  tableRoutes:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "routes"
+      AttributeDefinitions:
+        - 
+          AttributeName: "name"
+          AttributeType: "S"
+        - 
+          AttributeName: "routeID"
+          AttributeType: "S"
+        -
+          AttributeName: "location"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "routeID"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "1"
+        WriteCapacityUnits: "1"
+      GlobalSecondaryIndexes: 
+        - 
+          IndexName: "routesLocationIndex"
+          KeySchema: 
+            - 
+              AttributeName: "location"
+              KeyType: "HASH"
+            - 
+              AttributeName: "name"
+              KeyType: "RANGE"
+          Projection: 
+            NonKeyAttributes: 
+              - "routeID"
+              - "location"
+              - "name"
+              - "descriptionShort"
+              - "latlon"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "1"
+            WriteCapacityUnits: "1"
