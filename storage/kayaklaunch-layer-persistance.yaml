@@ -1,11 +1,21 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Peristent data stores for KayakLaunch.
+Description: Persistent data stores for KayakLaunch.
+
+Parameters:
+  stage:
+    Type: String
+    Default: "development"
+    Description: "The lifecycle stage of resources created buy this stack. All resources will be automatically tagged with this."
 
 Resources:
   tableRoutes:
     Type: "AWS::DynamoDB::Table"
     Properties:
-      TableName: "routes"
+      TableName: 
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-routes-"
+            - !Ref stage
       AttributeDefinitions:
         - 
           AttributeName: "name"
@@ -44,3 +54,23 @@ Resources:
           ProvisionedThroughput: 
             ReadCapacityUnits: "1"
             WriteCapacityUnits: "1"
+      Tags:
+        - 
+          Key: stage
+          Value: !Ref stage
+  bucketRoutes:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-routes-"
+            - !Ref stage
+      Tags:
+        - 
+          Key: stage
+          Value: !Ref stage
+
+
+
+      
