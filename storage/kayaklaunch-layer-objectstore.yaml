@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Persistent storage for files and objects for KayakLaunch.
+
+Parameters:
+  stage:
+    Type: String
+    Default: "development"
+    AllowedValues:
+      - development
+      - testing
+      - production
+    Description: "The lifecycle stage of resources created buy this stack. All resources will be automatically tagged with this."
+
+Resources:
+  bucketRoutes:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-routes-"
+            - !Ref stage
+      Tags:
+        - 
+          Key: stage
+          Value: !Ref stage
+  bucketSpots:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-spots-"
+            - !Ref stage
+      Tags:
+        - 
+          Key: stage
+          Value: !Ref stage
