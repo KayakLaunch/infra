@@ -18,7 +18,7 @@ Resources:
       TableName: 
         Fn::Join:
           - ''
-          - - "kayaklaunch-routes-"
+          - - "ddb-routes-"
             - !Ref stage
       AttributeDefinitions:
         - 
@@ -39,7 +39,12 @@ Resources:
         WriteCapacityUnits: "1"
       GlobalSecondaryIndexes: 
         - 
-          IndexName: "routesLocationIndex"
+          IndexName: 
+            Fn::Join:
+              - ''
+              - - "ddb-routes-"
+                - !Ref stage
+                - "index-location"
           KeySchema: 
             - 
               AttributeName: "location"

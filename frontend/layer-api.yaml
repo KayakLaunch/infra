@@ -30,7 +30,7 @@ Resources:
       RoleName:
         Fn::Join:
           - ''
-          - - "kayaklaunch-role-lambda-ro-"
+          - - "role-lambda-ro-"
             - !Ref stage
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -46,7 +46,7 @@ Resources:
           PolicyName:
             Fn::Join:
               - ''
-              - - "kayaklaunch-policy-lambda-ro-"
+              - - "policy-lambda-ro-"
                 - !Ref stage
           PolicyDocument: 
             Version: "2012-10-17"
@@ -70,7 +70,7 @@ Resources:
       Name:
         Fn::Join:
           - ''
-          - - "kayaklaunch-apgw-restapi-"
+          - - "apigw-restapi-"
             - !Ref stage
   apigwStage:
     Type: "AWS::ApiGateway::Stage"
@@ -129,7 +129,7 @@ Resources:
       FunctionName:
         Fn::Join:
           - ''
-          - - "kayaklaunch-function-route-get-"
+          - - "function-route-get-"
             - !Ref stage
       Handler: "lambda_function.lambda_handler"
       Role: !GetAtt lambdaRole.Arn
