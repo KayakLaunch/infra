@@ -36,3 +36,27 @@ Resources:
         - 
           Key: stage
           Value: !Ref stage
+  bucketCode:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-code-"
+            - !Ref stage
+      Tags:
+        - 
+          Key: stage
+          Value: !Ref stage
+  bucketFronend:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-frontend-"
+            - !Ref stage
+      Tags:
+        - 
+          Key: stage
+          Value: !Ref stage

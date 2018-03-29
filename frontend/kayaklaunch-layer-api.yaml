@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: The API for KayakLaunch.
+
+Parameters:
+  stage:
+    Type: String
+    Default: "development"
+    AllowedValues:
+      - development
+      - testing
+      - production
+    Description: "The lifecycle stage of resources created buy this stack. All resources will be automatically tagged with this."
+  ddbRoutesTableArn:
+    Type: String
+    Description: "The ARN of the DyanmoDB routes table which the Lambda functions will utilise."
+  ddbRoutesTableName:
+    Type: String
+    Description: "The name of the DyanmoDB routes table which the Lambda functions will utilise."
+  ddbRoutesTableIndexName:
+    Type: String
+    Description: "The name of the index of the DyanmoDB routes table which the Lambda functions will utilise."
+  codeBucketName:
+    Type: String
+    Description: "The name of the S3 bucket containing the code for the Lambda functions."
+
+Resources:
+  lambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-role-lambda-ro-"
+            - !Ref stage
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies: 
+        -
+          PolicyName:
+            Fn::Join:
+              - ''
+              - - "kayaklaunch-policy-lambda-ro-"
+                - !Ref stage
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action:
+                  - "dynamodb:GetItem"
+                  - "dynamodb:BatchGetItem"
+                  - "dynamodb:Scan"
+                  - "dynamodb:Query"
+                Resource:
+                  - !Ref ddbRoutesTableArn
+                  - Fn::Join:
+                    - ''
+                    - - !Ref ddbRoutesTableArn
+                      - '/*'
+  apigwRestApi:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-apgw-restapi-"
+            - !Ref stage
+  apigwStage:
+    Type: "AWS::ApiGateway::Stage"
+    Properties:
+      DeploymentId: !Ref apigwDeployment
+      RestApiId: !Ref apigwRestApi
+      StageName: !Ref stage
+  apigwDeployment:
+    DependsOn: "apigwRoutesMethod" 
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId: !Ref apigwRestApi
+  apigwRoutesResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apigwRestApi.RootResourceId
+      RestApiId: !Ref apigwRestApi
+      PathPart: "routes"
+  apigwRoutesMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      ApiKeyRequired: False
+      AuthorizationType: "NONE"
+      HttpMethod: "GET"
+      ResourceId: !Ref apigwRoutesResource
+      Integration:
+        Type: "AWS"
+        IntegrationHttpMethod: "POST"
+        Uri:
+          Fn::Join:
+            - ''
+            - - "arn:aws:apigateway:"
+              - !Ref AWS::Region
+              - ":lambda:path/2015-03-31/functions/"
+              - !GetAtt functionRoutesGet.Arn
+              - "/invocations"
+        ContentHandling: "CONVERT_TO_TEXT"
+        PassthroughBehavior: "WHEN_NO_MATCH"
+        IntegrationResponses:
+          -
+            StatusCode: 200
+            ResponseTemplates:
+              "application/json": ""
+      RestApiId: !Ref apigwRestApi
+      MethodResponses:
+        -
+          StatusCode: 200
+          ResponseModels:
+            "application/json": "Empty"
+  functionRoutesGet:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        S3Bucket: !Ref codeBucketName
+        S3Key: "routes-get/lambda_function.py.zip"
+      FunctionName:
+        Fn::Join:
+          - ''
+          - - "kayaklaunch-function-route-get-"
+            - !Ref stage
+      Handler: "lambda_function.lambda_handler"
+      Role: !GetAtt lambdaRole.Arn
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          "TABLE":  !Ref ddbRoutesTableName
+          "TABLEINDEX": !Ref ddbRoutesTableIndexName
+  functionRoutesGetPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: 'lambda:invokeFunction'
+      FunctionName: !Ref functionRoutesGet
+      Principal:  apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${apigwRestApi}/*
+  
+
+
+
