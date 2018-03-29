@@ -113,11 +113,32 @@ Resources:
           -
             StatusCode: 200
             ResponseTemplates:
-              "application/json": ""
+              "application/json":
+                Fn::Join:
+                  - ''
+                  - - "#set($inputRoot = $input.path('$')){"
+                    - "\"status\": \"success\","
+                    - "\"data\": {"
+                    - "\"routes\": [#foreach($elem in $inputRoot.Items){"
+                    - "\"name\": \"$elem.name.S\","
+                    - "\"location\": \"$elem.location.S\","
+                    - "\"descriptionShort\": \"$elem.descriptionShort.S\","
+                    - "\"routeID\": \"$elem.routeID.S\","
+                    - "\"latlon\": {\"start\": \"$elem.latlon.M.start.S\",\"end\": \"$elem.latlon.M.end.S\"}"
+                    - "}#if($foreach.hasNext),#end #end]}}"
+          -
+            StatusCode: 500
+            SelectionPattern: ".*error.*"
+            ResponseTemplates:
+              "application/json": "{\"status\": \"error\", \"message\": \"Internal Server Error\"}"
       RestApiId: !Ref apigwRestApi
       MethodResponses:
         -
           StatusCode: 200
+          ResponseModels:
+            "application/json": "Empty"
+        -
+          StatusCode: 500
           ResponseModels:
             "application/json": "Empty"
   functionRoutesGet:
