@@ -22,6 +22,9 @@ Parameters:
   codeBucketName:
     Type: String
     Description: "The name of the S3 bucket containing the code for the Lambda functions."
+  deploymentTimeStamp:
+    Type: String
+    Description: "A timestamp for the API Gateway deployment. Change this value to trigger a redeployment of the API, which is required after any updates to the API methods"
 
 Resources:
   lambdaDdbRoRole:
@@ -85,6 +88,7 @@ Resources:
     Type: "AWS::ApiGateway::Deployment"
     Properties:
       RestApiId: !Ref apigwRestApi
+      Description: !Ref deploymentTimeStamp
 
 ########### List Routes API ###########
   apigwRoutesResource:
@@ -128,7 +132,9 @@ Resources:
                     - "\"location\": \"$elem.location.S\","
                     - "\"descriptionShort\": \"$elem.descriptionShort.S\","
                     - "\"routeID\": \"$elem.routeID.S\","
-                    - "\"latlon\": {\"start\": \"$elem.latlon.M.start.S\",\"end\": \"$elem.latlon.M.end.S\"}"
+                    - "\"latlon\": {\"start\": \"$elem.latlon.M.start.S\",\"end\": \"$elem.latlon.M.end.S\"},"
+                    - "\"paddlingEnvironment\": \"$elem.paddlingEnvironment.S\","
+                    - "\"country\": \"$elem.country.S\""
                     - "}#if($foreach.hasNext),#end #end]}}"
           -
             StatusCode: 500
@@ -226,7 +232,9 @@ Resources:
                     - "\"hazards\": {\"environment\": [#foreach($elem in $inputRoot.Item.hazards.M.environment.SS)\"$elem\"#if($foreach.hasNext),#end #end],"
                     - "\"wildlife\": [#foreach($elem in $inputRoot.Item.hazards.M.wildlife.SS)\"$elem\"#if($foreach.hasNext),#end #end],"
                     - "\"weather\": [#foreach($elem in $inputRoot.Item.hazards.M.weather.SS)\"$elem\"#if($foreach.hasNext),#end #end],"
-                    - "\"traffic\": [#foreach($elem in $inputRoot.Item.hazards.M.traffic.SS)\"$elem\"#if($foreach.hasNext),#end #end]"
+                    - "\"traffic\": [#foreach($elem in $inputRoot.Item.hazards.M.traffic.SS)\"$elem\"#if($foreach.hasNext),#end #end],"
+                    - "\"paddlingEnvironment\": \"$inputRoot.Item.paddlingEnvironment.S\","
+                    - "\"country\": \"$inputRoot.Item.country.S\""
                     - "}}}"
           -
             StatusCode: 400

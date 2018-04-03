@@ -81,6 +81,12 @@ if len(sys.argv) > 1:
 			},
 			'type': {
 				'S': 'A-B'
+			},
+			'paddlingEnvironment': {
+				'S': 'Lake'
+			},
+			'country': {
+				'S': 'Switzerland'
 			}
 		}
 	)
@@ -154,6 +160,12 @@ if len(sys.argv) > 1:
 			},
 			'type': {
 				'S': 'A-B'
+			},
+			'paddlingEnvironment': {
+				'S': 'Lake'
+			},
+			'country': {
+				'S': 'Switzerland'
 			}
 		}
 	)

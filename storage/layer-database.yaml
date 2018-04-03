@@ -44,7 +44,7 @@ Resources:
               - ''
               - - "ddb-routes-"
                 - !Ref stage
-                - "index-location"
+                - "-index-location"
           KeySchema: 
             - 
               AttributeName: "location"
@@ -59,6 +59,8 @@ Resources:
               - "name"
               - "descriptionShort"
               - "latlon"
+              - "paddlingEnvironment"
+              - "country"
             ProjectionType: "INCLUDE"
           ProvisionedThroughput: 
             ReadCapacityUnits: "1"
